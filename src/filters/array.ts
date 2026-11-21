@@ -1,4 +1,4 @@
-import { toArray, argumentsToValue, toValue, stringify, caseInsensitiveCompare, orderedCompare, isArray, isNil, last as arrayLast, isArrayLike, toEnumerable } from '../util'
+import { toArray, argumentsToValue, toValue, stringify, caseInsensitiveCompare, orderedCompare, isArray, isNil, isArrayLike, readArrayElement, toEnumerable } from '../util'
 import { arrayIncludes, equals, evalToken, isTruthy } from '../render'
 import { Value, FilterImpl } from '../template'
 import { Tokenizer } from '../parser'
@@ -11,10 +11,14 @@ export const join = argumentsToValue(function (this: FilterImpl, v: any[], arg: 
   let outputSize = sep.length * Math.max(array.length - 1, 0)
   for (let i = 0; i < array.length; i++) outputSize += String(array[i]).length
   this.context.memoryLimit.use(outputSize)
-  return array.join(sep)
+  return Array.prototype.join.call(array, sep)
 })
-export const last = argumentsToValue((v: any) => isArrayLike(v) ? arrayLast(v) : '')
-export const first = argumentsToValue((v: any) => isArrayLike(v) ? v[0] : '')
+export const last = argumentsToValue(function (this: FilterImpl, v: any) {
+  return isArrayLike(v) ? readArrayElement(v, -1, this.context.ownPropertyOnly) : ''
+})
+export const first = argumentsToValue(function (this: FilterImpl, v: any) {
+  return isArrayLike(v) ? readArrayElement(v, 0, this.context.ownPropertyOnly) : ''
+})
 export const reverse = argumentsToValue(function (this: FilterImpl, v: any[]) {
   const array = toArray(v)
   this.context.memoryLimit.use(array.length)
@@ -67,14 +71,14 @@ export function * sum (this: FilterImpl, arr: Scope[], property?: string): Itera
 export function compact<T> (this: FilterImpl, arr: T[]) {
   const array = toArray(arr)
   this.context.memoryLimit.use(array.length)
-  return array.filter(x => !isNil(toValue(x)))
+  return Array.prototype.filter.call(array, x => !isNil(toValue(x)))
 }
 
 export function concat<T1, T2> (this: FilterImpl, v: T1[], arg: T2[] = []): (T1 | T2)[] {
   const lhs = toArray(v)
   const rhs = toArray(arg)
   this.context.memoryLimit.use(lhs.length + rhs.length)
-  return lhs.concat(rhs)
+  return Array.prototype.concat.call(lhs, rhs)
 }
 
 export function push<T> (this: FilterImpl, v: T[], arg: T): T[] {
@@ -111,7 +115,9 @@ export function slice<T> (this: FilterImpl, v: T[] | string, begin: number, leng
   if (!isArray(v)) v = stringify(v)
   begin = begin < 0 ? v.length + begin : begin
   this.context.memoryLimit.use(length)
-  return v.slice(begin, begin + length)
+  return isArray(v)
+    ? Array.prototype.slice.call(v, begin, begin + length)
+    : String.prototype.slice.call(v, begin, begin + length)
 }
 
 function expectedMatcher (this: FilterImpl, expected: any): (v: any) => boolean {
@@ -133,7 +139,7 @@ function * filter<T extends object> (this: FilterImpl, include: boolean, arr: T[
     values.push(yield evalToken(token, this.context.spawn(item)))
   }
   const matcher = expectedMatcher.call(this, expected)
-  return arr.filter((_, i) => matcher(values[i]) === include)
+  return Array.prototype.filter.call(arr, (_, i) => matcher(values[i]) === include)
 }
 
 function * filter_exp<T extends object> (this: FilterImpl, include: boolean, arr: T[], itemName: string, exp: string): IterableIterator<unknown> {
