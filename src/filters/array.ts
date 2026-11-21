@@ -8,8 +8,9 @@ import { EmptyDrop } from '../drop'
 export const join = argumentsToValue(function (this: FilterImpl, v: any[], arg: string) {
   const array = toArray(v)
   const sep = isNil(arg) ? ' ' : stringify(arg)
-  const complexity = array.length * (1 + sep.length)
-  this.context.memoryLimit.use(complexity)
+  let outputSize = sep.length * Math.max(array.length - 1, 0)
+  for (let i = 0; i < array.length; i++) outputSize += String(array[i]).length
+  this.context.memoryLimit.use(outputSize)
   return array.join(sep)
 })
 export const last = argumentsToValue((v: any) => isArrayLike(v) ? arrayLast(v) : '')
