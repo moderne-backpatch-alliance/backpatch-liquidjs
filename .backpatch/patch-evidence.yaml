@@ -1,6 +1,6 @@
 schema: osera-patch-evidence/0.1.0
 producer: moderne
-release: 10.25.8-backpatch-00003
+release: 10.25.8-backpatch-00004
 baseline: v10.25.7+backpatch.baseline
 fixes:
   - cve: CVE-2026-44644
@@ -26,12 +26,20 @@ fixes:
     basis: backport
     artifacts:
       - liquidjs
-    note: "New in this release; upstream's fix in 10.26.0. It closes the advisory: LiquidJS's `{% render %}` tag silently bypasses per-render `ownPropertyOnly:true` via `Context.spawn()`."
+    note: "Carried from 10.25.8-backpatch-00003; upstream's fix in 10.26.0. It closes the advisory: LiquidJS's `{% render %}` tag silently bypasses per-render `ownPropertyOnly:true` via `Context.spawn()`."
+  - cve: CVE-2026-45357
+    upstream_fix_url: https://github.com/harttle/liquidjs/commit/3129d46dc95efa357b00e5a57ee1af80a13d72ed
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2026-45357
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-liquidjs/commit/cae7eac
+    basis: backport
+    artifacts:
+      - liquidjs
+    note: "New in this release; upstream's fix in 10.26.0. It closes the advisory: LiquidJS has a memory and render limit bypass via unbounded width padding in `date` filter (strftime)."
 tests:
-  commit: b6778cd21d362d84a8f92ef23e7842d7a13d5fe6
+  commit: cae7eaccace3bdd2c1eba5dec8940f943dd51267
   command: npm ci --ignore-scripts at the tag (its package-lock.json), npm run build (rollup -c rollup.config.mjs), npm pack --ignore-scripts at the tested commit, then jest --ci in the build directory; jest's JSON results converted to a JUnit report
   runtime: Node.js v22.23.2, npm 10.9.8, jest 29.5.0, ts-jest 29.0.5, typescript 4.9.5, rollup 1.32.1, macOS 27.2 arm64
-  report: liquidjs-10.25.8-backpatch-00003-tests.zip
-  report_sha256: 6e202e7ea478047564afc6145cc74fd2406b575dcc4ee44c094f9b425970660e
+  report: liquidjs-10.25.8-backpatch-00004-tests.zip
+  report_sha256: ab32afbeeaecf20ef22e476015885e88d188eaf08faec6eef9ffa44a2ec2ec2b
   result: pass
-  note: "upstream's jest suite (npm test: jest.config.js, every *.spec.ts: src unit tests, test/ integration and e2e on the rebuilt dist/) in the build directory at the tested commit: 1524 tests, 1524 passed, 0 failed, 0 skipped. The CVE tests (test/integration/tags/render.spec.ts), with this release's production lines reverted at the tested commit: 39 tests, 38 passed, 1 failed, 0 skipped; with them: 39 tests, 39 passed, 0 failed, 0 skipped. Built with npm run build (rollup) in a directory named liquidjs, 155 of npmjs's 163 files for 10.25.7 are identical; the rest are dist/liquid.browser.min.js, dist/liquid.browser.min.js.map, dist/liquid.browser.mjs, dist/liquid.browser.umd.js, dist/liquid.browser.umd.js.map, dist/liquid.node.js, dist/liquid.node.mjs, package.json. The archive's file-origins.yaml maps each packaged file to the commit, or names its inputs and build."
+  note: "upstream's jest suite (npm test: jest.config.js, every *.spec.ts: src unit tests, test/ integration and e2e on the rebuilt dist/) in the build directory at the tested commit: 1528 tests, 1528 passed, 0 failed, 0 skipped. The CVE tests (test/integration/filters/date.spec.ts), with this release's production lines reverted at the tested commit: 61 tests, 57 passed, 4 failed, 0 skipped; with them: 61 tests, 61 passed, 0 failed, 0 skipped. Built with npm run build (rollup) in a directory named liquidjs, 154 of npmjs's 163 files for 10.25.7 are identical; the rest are dist/liquid.browser.min.js, dist/liquid.browser.min.js.map, dist/liquid.browser.mjs, dist/liquid.browser.umd.js, dist/liquid.browser.umd.js.map, dist/liquid.node.js, dist/liquid.node.mjs, dist/util/strftime.d.ts, package.json. The archive's file-origins.yaml maps each packaged file to the commit, or names its inputs and build."
