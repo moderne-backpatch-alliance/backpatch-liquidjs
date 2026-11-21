@@ -1,0 +1,21 @@
+schema: osera-patch-evidence/0.1.0
+producer: moderne
+release: 10.25.8-backpatch-00001
+baseline: v10.25.7+backpatch.baseline
+fixes:
+  - cve: CVE-2026-44644
+    upstream_fix_url: https://github.com/harttle/liquidjs/commit/26ea2856c7a90aec892b98d94a9b7a3e18539045
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2026-44644
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-liquidjs/commit/c493d78
+    basis: backport
+    artifacts:
+      - liquidjs
+    note: "New in this release; upstream's fix in 10.26.0. It closes the advisory: LiquidJS's strip_html filter bypass via newline characters in HTML tags enables XSS."
+tests:
+  commit: c493d7865ca3383bc1204a2f974fe7b576b05aed
+  command: npm ci --ignore-scripts at the tag (its package-lock.json), npm run build (rollup -c rollup.config.mjs), npm pack --ignore-scripts at the tested commit, then jest --ci in the build directory; jest's JSON results converted to a JUnit report
+  runtime: Node.js v22.23.2, npm 10.9.8, jest 29.5.0, ts-jest 29.0.5, typescript 4.9.5, rollup 1.32.1, macOS 27.2 arm64
+  report: liquidjs-10.25.8-backpatch-00001-tests.zip
+  report_sha256: 9b72c9f0d95759acaafb8c8a61de58278051275a03fba3f49bb41ab03d181b0c
+  result: pass
+  note: "upstream's jest suite (npm test: jest.config.js, every *.spec.ts: src unit tests, test/ integration and e2e on the rebuilt dist/) in the build directory at the tested commit: 1521 tests, 1521 passed, 0 failed, 0 skipped. The CVE tests (test/integration/filters/html.spec.ts), with this release's production lines reverted at the tested commit: 18 tests, 17 passed, 1 failed, 0 skipped; with them: 18 tests, 18 passed, 0 failed, 0 skipped. Built with npm run build (rollup) in a directory named liquidjs, 155 of npmjs's 163 files for 10.25.7 are identical; the rest are dist/liquid.browser.min.js, dist/liquid.browser.min.js.map, dist/liquid.browser.mjs, dist/liquid.browser.umd.js, dist/liquid.browser.umd.js.map, dist/liquid.node.js, dist/liquid.node.mjs, package.json. The archive's file-origins.yaml maps each packaged file to the commit, or names its inputs and build."
